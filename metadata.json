@@ -1,0 +1,5 @@
+{
+  "name": "Fidelity Planviewer Clone",
+  "description": "A comprehensive retirement plan dashboard simulating Fidelity NetBenefits. Features real-time investment tracking, performance visualization, and an AI-powered financial assistant.",
+  "requestFramePermissions": []
+}
