@@ -1,7 +1,7 @@
 import { Investment, Transaction, PerformanceData } from './types';
 
 export const USER_NAME = "Alexander J. Investor";
-export const PLAN_NAME = "ACME CORP 401(K) SAVINGS PLAN";
+export const PLAN_NAME = "ACME 401(k) Plan";
 export const PLAN_ID = "84291-01";
 
 export const MOCK_HOLDINGS: Investment[] = [
