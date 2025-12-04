@@ -35,3 +35,5 @@ export enum TabView {
   ACTIVITY = 'Activity',
   ANALYSIS = 'Analysis'
 }
+
+export type Page = 'Accounts' | 'Planning' | 'News' | 'Profile';

@@ -11,7 +11,12 @@ import {
   ArrowRight,
   Download,
   Printer,
-  Info
+  Info,
+  TrendingUp,
+  Target,
+  ShieldCheck,
+  Calendar,
+  BarChart2
 } from 'lucide-react';
 import { 
   MOCK_HOLDINGS, 
@@ -20,9 +25,10 @@ import {
   PLAN_NAME, 
   PLAN_ID 
 } from './constants';
-import { TabView } from './types';
+import { TabView, Page, PerformanceData } from './types';
 
 function App() {
+  const [activePage, setActivePage] = useState<Page>('Accounts');
   const [activeTab, setActiveTab] = useState<TabView>(TabView.SUMMARY);
 
   const totalBalance = MOCK_HOLDINGS.reduce((acc, curr) => acc + curr.balance, 0);
@@ -312,51 +318,158 @@ function App() {
     </div>
   );
 
-  return (
-    <Layout>
-      {/* Page Title & Plan Info */}
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-gray-900 mb-1">{PLAN_NAME}</h1>
-        <p className="text-sm text-gray-500">Plan ID: {PLAN_ID}</p>
-      </div>
+  const renderPlanningPage = () => {
+    // Mock projection data
+    const currentYear = new Date().getFullYear();
+    const projectionData: PerformanceData[] = [];
+    let projectedBalance = totalBalance;
+    for (let i = 0; i <= 30; i += 2) {
+      projectionData.push({
+        date: (currentYear + i).toString(),
+        balance: Math.round(projectedBalance)
+      });
+      // Simple 6% compound + $15k annual contribution simulation
+      projectedBalance = (projectedBalance * 1.06) + 30000; 
+    }
 
-      {/* Tabs Navigation */}
-      <div className="border-b border-gray-200 mb-6">
-        <nav className="-mb-px flex space-x-8 overflow-x-auto" aria-label="Tabs">
-          {Object.values(TabView).map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`
-                whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors
-                ${activeTab === tab
-                  ? 'border-[#5d9632] text-[#5d9632]'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-                }
-              `}
-            >
-              {tab}
-            </button>
-          ))}
-        </nav>
-      </div>
-
-      {/* Tab Content */}
-      <div className="min-h-[500px]">
-        {activeTab === TabView.SUMMARY && renderSummaryTab()}
-        {activeTab === TabView.INVESTMENTS && renderInvestmentsTab()}
-        {activeTab === TabView.ACTIVITY && renderActivityTab()}
-        {activeTab === TabView.ANALYSIS && (
-          <div className="bg-white p-12 text-center rounded-lg border border-gray-200 shadow-sm flex flex-col items-center justify-center min-h-[300px]">
-             <div className="bg-gray-100 p-4 rounded-full mb-4">
-                <PieChart className="w-10 h-10 text-gray-400" />
-             </div>
-             <h3 className="text-lg font-medium text-gray-900">Portfolio Analysis</h3>
-             <p className="text-gray-500 mt-2 max-w-md">Detailed asset allocation visualizations and personalized retirement projection tools are coming soon.</p>
+    return (
+      <div className="space-y-6 animate-fade-in">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-2">
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900">Retirement Analysis</h1>
+            <p className="text-sm text-gray-500 mt-1">Based on your current portfolio and contribution settings.</p>
           </div>
-        )}
-      </div>
+          <button className="mt-4 md:mt-0 px-4 py-2 bg-[#5d9632] text-white rounded-md text-sm font-medium shadow-sm hover:bg-[#4a7a28] transition-colors flex items-center gap-2">
+             <Target className="w-4 h-4" /> Update Retirement Goal
+          </button>
+        </div>
 
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Main Projection Chart */}
+          <div className="lg:col-span-2 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4 flex items-center gap-2">
+               <TrendingUp className="w-5 h-5 text-[#5d9632]" /> Projected Account Balance
+            </h3>
+            <div className="h-80">
+               <NetWorthChart data={projectionData} />
+            </div>
+            <div className="mt-4 bg-gray-50 p-4 rounded-md text-sm text-gray-600 flex items-start gap-3">
+              <Info className="w-5 h-5 text-[#5d9632] flex-shrink-0 mt-0.5" />
+              <p>
+                This hypothetical illustration assumes a 6% annual rate of return and $15,000 in annual contributions. 
+                Actual results will vary. This is not a guarantee of future performance.
+              </p>
+            </div>
+          </div>
+
+          {/* Score & Key Metrics */}
+          <div className="space-y-6">
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 text-center relative overflow-hidden">
+               <div className="absolute top-0 left-0 w-full h-1 bg-[#5d9632]"></div>
+               <h3 className="text-gray-500 font-medium text-sm uppercase tracking-wide mb-4">Retirement Score</h3>
+               <div className="flex items-center justify-center mb-2">
+                 <div className="w-32 h-32 rounded-full border-8 border-green-100 border-t-[#5d9632] border-r-[#5d9632] flex items-center justify-center transform -rotate-45">
+                    <div className="transform rotate-45 text-center">
+                       <span className="text-3xl font-bold text-gray-900">92</span>
+                       <span className="block text-xs text-green-600 font-bold uppercase">On Track</span>
+                    </div>
+                 </div>
+               </div>
+               <p className="text-sm text-gray-600 mt-2">
+                 You are on track to cover <span className="font-bold text-gray-900">92%</span> of your estimated retirement expenses.
+               </p>
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+               <h3 className="text-gray-800 font-semibold mb-4">Planning Assumptions</h3>
+               <div className="space-y-4">
+                  <div className="flex justify-between items-center pb-3 border-b border-gray-100">
+                     <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Calendar className="w-4 h-4 text-gray-400" /> Retirement Age
+                     </div>
+                     <span className="font-medium text-gray-900">67</span>
+                  </div>
+                  <div className="flex justify-between items-center pb-3 border-b border-gray-100">
+                     <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <ShieldCheck className="w-4 h-4 text-gray-400" /> Annual Savings
+                     </div>
+                     <span className="font-medium text-gray-900">$15,000</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                     <div className="flex items-center gap-2 text-sm text-gray-600">
+                        <Activity className="w-4 h-4 text-gray-400" /> Est. Annual Return
+                     </div>
+                     <span className="font-medium text-gray-900">6.0%</span>
+                  </div>
+               </div>
+               <button className="w-full mt-6 py-2 border border-[#5d9632] text-[#5d9632] rounded hover:bg-green-50 text-sm font-medium transition-colors">
+                  Edit Assumptions
+               </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const renderAnalysisTab = () => (
+    <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
+      <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <BarChart2 className="w-8 h-8 text-gray-400" />
+      </div>
+      <h3 className="text-lg font-medium text-gray-900">Portfolio Analysis</h3>
+      <p className="text-gray-500 mt-2 max-w-sm mx-auto">
+        Detailed performance attribution and risk analysis tools are coming soon to this section.
+      </p>
+    </div>
+  );
+
+  return (
+    <Layout activePage={activePage} onNavigate={setActivePage}>
+      {activePage === 'Accounts' ? (
+        <>
+          {/* Page Title & Plan Info */}
+          <div className="mb-8">
+            <h1 className="text-2xl font-bold text-gray-900 mb-1">{PLAN_NAME}</h1>
+            <p className="text-sm text-gray-500">Plan ID: {PLAN_ID}</p>
+          </div>
+
+          {/* Tabs Navigation */}
+          <div className="border-b border-gray-200 mb-6">
+            <nav className="-mb-px flex space-x-8" aria-label="Tabs">
+              {Object.values(TabView).map((tab) => (
+                <button
+                  key={tab}
+                  onClick={() => setActiveTab(tab)}
+                  className={`
+                    whitespace-nowrap py-4 px-1 border-b-2 font-medium text-sm transition-colors
+                    ${activeTab === tab
+                      ? 'border-[#5d9632] text-[#5d9632]'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
+                  `}
+                >
+                  {tab}
+                </button>
+              ))}
+            </nav>
+          </div>
+
+          {/* Tab Content */}
+          <div className="animate-fade-in">
+            {activeTab === TabView.SUMMARY && renderSummaryTab()}
+            {activeTab === TabView.INVESTMENTS && renderInvestmentsTab()}
+            {activeTab === TabView.ACTIVITY && renderActivityTab()}
+            {activeTab === TabView.ANALYSIS && renderAnalysisTab()}
+          </div>
+        </>
+      ) : activePage === 'Planning' ? (
+        renderPlanningPage()
+      ) : (
+        <div className="flex flex-col items-center justify-center min-h-[400px] text-center">
+          <h2 className="text-2xl font-bold text-gray-900 mb-2">{activePage}</h2>
+          <p className="text-gray-500">This section is currently under development.</p>
+        </div>
+      )}
       <AIAssistant />
     </Layout>
   );

@@ -1,12 +1,22 @@
 import React from 'react';
-import { User, LogOut, Search, Menu, Bell } from 'lucide-react';
+import { LogOut, Search, Menu, Bell } from 'lucide-react';
 import { USER_NAME } from '../constants';
+import { Page } from '../types';
 
 interface LayoutProps {
   children: React.ReactNode;
+  activePage: Page;
+  onNavigate: (page: Page) => void;
 }
 
-const Layout: React.FC<LayoutProps> = ({ children }) => {
+const Layout: React.FC<LayoutProps> = ({ children, activePage, onNavigate }) => {
+  const navItems: { id: Page; label: string }[] = [
+    { id: 'Accounts', label: 'Accounts' },
+    { id: 'Planning', label: 'Planning' },
+    { id: 'News', label: 'News & Research' },
+    { id: 'Profile', label: 'Profile' },
+  ];
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col font-sans">
       {/* Top Fidelity Green Bar */}
@@ -18,7 +28,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <div className="flex justify-between h-16 items-center">
             {/* Logo Area */}
             <div className="flex items-center">
-              <div className="flex-shrink-0 flex items-center gap-2 cursor-pointer">
+              <div 
+                className="flex-shrink-0 flex items-center gap-2 cursor-pointer"
+                onClick={() => onNavigate('Accounts')}
+              >
                 {/* Simulated Logo */}
                 <div className="w-8 h-8 bg-[#5d9632] rounded-sm flex items-center justify-center text-white font-bold text-lg">
                   F
@@ -30,10 +43,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
             {/* Desktop Nav */}
             <div className="hidden md:flex space-x-8">
-              <a href="#" className="text-gray-900 font-medium border-b-2 border-[#5d9632] px-1 pt-1 h-16 flex items-center">Accounts</a>
-              <a href="#" className="text-gray-500 hover:text-gray-700 font-medium px-1 pt-1 h-16 flex items-center transition-colors">Planning</a>
-              <a href="#" className="text-gray-500 hover:text-gray-700 font-medium px-1 pt-1 h-16 flex items-center transition-colors">News & Research</a>
-              <a href="#" className="text-gray-500 hover:text-gray-700 font-medium px-1 pt-1 h-16 flex items-center transition-colors">Profile</a>
+              {navItems.map((item) => (
+                <button
+                  key={item.id}
+                  onClick={() => onNavigate(item.id)}
+                  className={`
+                    font-medium px-1 pt-1 h-16 flex items-center transition-colors border-b-2 focus:outline-none
+                    ${activePage === item.id 
+                      ? 'border-[#5d9632] text-gray-900' 
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'}
+                  `}
+                >
+                  {item.label}
+                </button>
+              ))}
             </div>
 
             {/* Right Actions */}
@@ -59,7 +82,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
       {/* Mobile Menu Bar (Simulated) */}
       <div className="md:hidden bg-white border-b border-gray-200 px-4 py-2 flex items-center justify-between">
-         <span className="text-sm font-semibold text-gray-600">Menu</span>
+         <span className="text-sm font-semibold text-gray-600">{activePage}</span>
          <Menu className="w-5 h-5 text-gray-600" />
       </div>
 
